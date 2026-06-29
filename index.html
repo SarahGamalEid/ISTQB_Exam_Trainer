@@ -1,0 +1,915 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISTQB Exam Trainer</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --text-muted: #666666;
+            --primary-color: #0066cc;
+            --primary-hover: #0052a3;
+            --border-color: #e0e0e0;
+            --success-color: #2e7d32;
+            --danger-color: #c62828;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --text-muted: #aaaaaa;
+            --primary-color: #4da6ff;
+            --primary-hover: #80bfff;
+            --border-color: #333333;
+            --success-color: #81c784;
+            --danger-color: #e57373;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo-area h1 {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        button {
+            cursor: pointer;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            border: none;
+            font-weight: 600;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-theme {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        nav {
+            display: flex;
+            background-color: var(--card-bg);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 2rem;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            color: var(--text-muted);
+            white-space: nowrap;
+        }
+
+        .nav-tab.active {
+            border-bottom-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Reusable Grid & Cards */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-card h3 {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-color);
+        }
+
+        .stat-card.accuracy .value {
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <h1>ISTQB Exam Trainer</h1>
+        </div>
+        <div class="controls">
+            <button class="btn-theme" id="themeToggle">Dark Mode</button>
+        </div>
+    </header>
+
+    <nav>
+        <div class="nav-tab active" onclick="switchTab('dashboard')">Dashboard</div>
+        <div class="nav-tab" onclick="switchTab('import')">Import Questions</div>
+        <div class="nav-tab" onclick="switchTab('practice')">Practice Mode</div>
+        <div class="nav-tab" onclick="switchTab('exam')">Exam Mode</div>
+        <div class="nav-tab" onclick="switchTab('manager')">Question Manager</div>
+        <div class="nav-tab" onclick="switchTab('statistics')">Statistics</div>
+    </nav>
+
+    <main>
+        <section id="dashboard" class="tab-content active">
+            <h2>Welcome Back</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Here is your current preparation status:</p>
+            
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <h3>Total Questions</h3>
+                    <div class="value" id="dashTotal">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Solved Questions</h3>
+                    <div class="value" id="dashSolved">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Correct Answers</h3>
+                    <div class="value" id="dashCorrect" style="color: var(--success-color);">0</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Wrong Answers</h3>
+                    <div class="value" id="dashWrong" style="color: var(--danger-color);">0</div>
+                </div>
+                <div class="stat-card accuracy">
+                    <h3>Accuracy</h3>
+                    <div class="value" id="dashAccuracy">0%</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="import" class="tab-content">
+            <h2>Import Questions</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+                Paste standard plain text formatted questions below. The layout will parse metadata clusters natively.
+            </p>
+            
+            <div style="margin-bottom: 1rem;">
+                <textarea id="importText" rows="12" style="width: 100%; padding: 1rem; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--card-bg); color: var(--text-color); font-family: monospace; resize: vertical;" placeholder="Question:&#10;What is Selenium?&#10;A. Browser&#10;B. Framework&#10;C. Automation Tool&#10;D. Database&#10;Answer:&#10;C&#10;Explanation:&#10;Selenium is a browser automation tool."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1.5rem;">
+                <button id="btnDoImport" style="background-color: var(--primary-color); color: white;">Parse & Import</button>
+                <button id="btnClearImport" style="background-color: var(--border-color); color: var(--text-color);">Clear Input</button>
+            </div>
+            <div id="importStatus" style="display: none; padding: 1rem; border-radius: 6px; margin-bottom: 1rem; font-weight: 500;"></div>
+        </section>
+
+        <section id="practice" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2>Practice Mode</h2>
+                <button id="btnPracticeBookmark" style="background-color: var(--border-color); color: var(--text-color); font-size: 1.2rem; padding: 0.4rem 0.8rem;">☆ Bookmark</button>
+            </div>
+
+            <div id="practiceEmptyState" class="stat-card" style="padding: 3rem; display: none;">
+                <p style="color: var(--text-muted); font-size: 1.2rem;">No questions available in the local database. Please import or restore questions to practice.</p>
+            </div>
+
+            <div id="practiceWorkspace">
+                <div class="stat-card" style="text-align: left; margin-bottom: 1.5rem; padding: 2rem;">
+                    <div id="practiceMeta" style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem;"></div>
+                    <p id="practiceQuestionText" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; white-space: pre-line;"></p>
+                    
+                    <div id="practiceOptionsContainer" style="display: flex; flex-direction: column; gap: 0.8rem;">
+                        </div>
+                </div>
+
+                <div id="practiceExplanationContainer" class="stat-card" style="text-align: left; display: none; margin-bottom: 1.5rem; border-left: 4px solid var(--primary-color); padding: 1.5rem;">
+                    <h4 style="color: var(--primary-color); margin-bottom: 0.5rem;">Explanation Summary</h4>
+                    <p id="practiceExplanationText" style="white-space: pre-line;"></p>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 1rem;">
+                        <button id="btnPracticePrev" style="background-color: var(--border-color); color: var(--text-color);">Previous</button>
+                        <button id="btnPracticeNext" style="background-color: var(--border-color); color: var(--text-color);">Next</button>
+                    </div>
+                    <button id="btnPracticeSubmit" style="background-color: var(--primary-color); color: white;">Submit Answer</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="exam" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                <h2>Exam Mode</h2>
+                <div id="examTimer" style="font-size: 1.3rem; font-weight: 700; background-color: var(--card-bg); padding: 0.5rem 1rem; border-radius: 4px; border: 1px solid var(--border-color); font-family: monospace;">00:00</div>
+            </div>
+
+            <div id="examConfig" class="stat-card" style="text-align: left; max-width: 500px; margin: 2rem auto; padding: 2rem;">
+                <h3 style="margin-bottom: 1rem;">Configure Mock Examination</h3>
+                <div style="margin-bottom: 1.5rem;">
+                    <label for="examCount" style="display: block; font-weight: 600; margin-bottom: 0.5rem;">Number of Questions:</label>
+                    <input type="number" id="examCount" value="20" min="1" max="100" style="width: 100%; padding: 0.6rem; border-radius: 4px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color);">
+                </div>
+                <button id="btnStartExam" style="background-color: var(--primary-color); color: white; width: 100%; padding: 0.8rem;">Start Test Engine</button>
+            </div>
+
+            <div id="examWorkspace" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                    <span id="examProgress" style="font-weight: 600; color: var(--text-muted);">Question 1 of X</span>
+                    <button id="btnFlagQuestion" style="background-color: var(--border-color); color: var(--text-color); display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem;">
+                        🚩 <span id="flagBtnText">Flag Question</span>
+                    </button>
+                </div>
+
+                <div class="stat-card" style="text-align: left; margin-bottom: 1.5rem; padding: 2rem;">
+                    <p id="examQuestionText" style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1.5rem; white-space: pre-line;"></p>
+                    <div id="examOptionsContainer" style="display: flex; flex-direction: column; gap: 0.8rem;"></div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; gap: 1rem;">
+                        <button id="btnExamPrev" style="background-color: var(--border-color); color: var(--text-color);">Previous</button>
+                        <button id="btnExamNext" style="background-color: var(--border-color); color: var(--text-color);">Next</button>
+                    </div>
+                    <button id="btnSubmitExam" style="background-color: var(--danger-color); color: white;">Submit Examination</button>
+                </div>
+            </div>
+
+            <div id="examResults" style="display: none; margin-top: 2rem;">
+                <h3 style="margin-bottom: 1rem; text-align: center;">Examination Evaluation Summary</h3>
+                <div class="dashboard-grid" style="margin-bottom: 2rem;">
+                    <div class="stat-card"><div class="value" id="examResultScore" style="color: var(--primary-color);">0%</div><h3>Final Score</h3></div>
+                    <div class="stat-card"><div class="value" id="examResultCorrect" style="color: var(--success-color);">0</div><h3>Correct</h3></div>
+                    <div class="stat-card"><div class="value" id="examResultWrong" style="color: var(--danger-color);">0</div><h3>Wrong</h3></div>
+                    <div class="stat-card"><div class="value" id="examResultSkipped" style="color: var(--text-muted);">0</div><h3>Skipped</h3></div>
+                </div>
+                <button id="btnExitExam" style="background-color: var(--primary-color); color: white; display: block; margin: 0 auto; padding: 0.8rem 2rem;">Return to Configuration</button>
+            </div>
+        </section>
+
+        <section id="statistics" class="tab-content">
+            <h2>Performance Statistics & Diagnostics</h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">Deep-dive diagnostics of historical system execution pools.</p>
+
+            <div class="dashboard-grid" style="margin-bottom: 2rem;">
+                <div class="stat-card"><h3>Total Database Pool</h3><div class="value" id="statsTotalPool">0</div></div>
+                <div class="stat-card"><h3>Total Attempts Logged</h3><div class="value" id="statsTotalAttempts">0</div></div>
+                <div class="stat-card"><h3>Unresolved Misses</h3><div class="value" id="statsTotalMisses">0</div></div>
+                <div class="stat-card"><h3>Active Bookmarks</h3><div class="value" id="statsTotalBookmarks">0</div></div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(450px, 1fr)); gap: 2rem;">
+                <div class="stat-card" style="text-align: left; padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Syllabus Chapter Breakdown</h3>
+                    <table style="width: 100%; border-collapse: collapse;"><tbody id="statsChapterTableBody"></tbody></table>
+                </div>
+                <div class="stat-card" style="text-align: left; padding: 1.5rem;">
+                    <h3 style="margin-bottom: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">Taxonomy Proficiency Breakdown ($K$-Levels)</h3>
+                    <table style="width: 100%; border-collapse: collapse;"><tbody id="statsKLevelTableBody"></tbody></table>
+                </div>
+            </div>
+        </section>
+
+        <section id="manager" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+                <h2>Question Manager</h2>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button id="btnExportJSON" style="background-color: var(--success-color); color: white; font-size: 0.9rem;">Export JSON</button>
+                    <button id="btnTriggerJSONImport" style="background-color: var(--primary-color); color: white; font-size: 0.9rem;">Import JSON</button>
+                    <input type="file" id="fileJSONInput" accept=".json" style="display: none;">
+                    <button id="btnDeleteAll" style="background-color: var(--danger-color); color: white; font-size: 0.9rem;">Purge Database</button>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <input type="text" id="managerSearchInput" placeholder="Filter questions by text strings..." style="width: 100%; padding: 0.8rem; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--card-bg); color: var(--text-color); font-size: 1rem;">
+            </div>
+
+            <div id="managerQuestionsList" style="display: flex; flex-direction: column; gap: 1rem; max-height: 600px; overflow-y: auto;"></div>
+        </section>
+    </main>
+
+    <div id="editModalOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000; justify-content: center; align-items: center; padding: 1rem;">
+        <div class="stat-card" style="text-align: left; width: 100%; max-width: 700px; max-height: 90vh; overflow-y: auto; background-color: var(--card-bg);">
+            <h3 style="margin-bottom: 1rem;">Modify Question Record</h3>
+            <input type="hidden" id="editQId">
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div><label style="font-size:0.85rem; font-weight:600;">Chapter</label><input type="text" id="editQChapter" style="width:100%; padding:0.5rem; background:var(--bg-color); color:var(--text-color); border:1px solid var(--border-color);"></div>
+                <div><label style="font-size:0.85rem; font-weight:600;">Section</label><input type="text" id="editQSyllabus" style="width:100%; padding:0.5rem; background:var(--bg-color); color:var(--text-color); border:1px solid var(--border-color);"></div>
+                <div><label style="font-size:0.85rem; font-weight:600;">K-Level</label><input type="text" id="editQKLevel" style="width:100%; padding:0.5rem; background:var(--bg-color); color:var(--text-color); border:1px solid var(--border-color);"></div>
+            </div>
+            <div style="margin-bottom: 1rem;"><label style="font-size:0.85rem; font-weight:600;">Question Statement</label><textarea id="editQText" rows="3" style="width:100%; background:var(--bg-color); color:var(--text-color); border:1px solid var(--border-color);"></textarea></div>
+            <div style="margin-bottom: 1rem;"><label style="font-size:0.85rem; font-weight:600;">Options (One per line)</label><textarea id="editQOptions" rows="4" style="width:100%; background:var(--bg-color); color:var(--text-color); border:1px solid var(--border-color);"></textarea></div>
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1rem; margin-bottom: 1.5rem;">
+                <div><label style="font-size:0.85rem; font-weight:600;">Correct Answer</label><input type="text" id="editQCorrect" maxlength="1" style="width:100%; padding:0.5rem; background:var(--bg-color); color:var(--text-color); border:1px solid var(--border-color);"></div>
+                <div><label style="font-size:0.85rem; font-weight:600;">Explanation Reference</label><input type="text" id="editQExplanation" style="width:100%; padding:0.5rem; background:var(--bg-color); color:var(--text-color); border:1px solid var(--border-color);"></div>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:1rem;"><button id="btnCancelEdit" style="background-color:var(--border-color); color:var(--text-color);">Cancel</button><button id="btnSaveEdit" style="background-color:var(--primary-color); color:white;">Save Changes</button></div>
+        </div>
+    </div>
+
+    <script>
+        // --- DATA LAYERING & INITIALIZATION ---
+        const DB_NAME = 'ISTQB_Trainer_DB';
+        const DB_VERSION = 1;
+        let db = null;
+
+        // Practice State Pointers
+        let practiceQuestions = [];
+        let practiceIndex = 0;
+        let selectedPracticeOption = null;
+        let practiceIsSubmitted = false;
+
+        // Exam State Pointers
+        let examQuestions = [];
+        let examAnswers = {};
+        let examFlags = {};
+        let examIndex = 0;
+        let examTimerInterval = null;
+        let examSecondsElapsed = 0;
+
+        // Question Manager Pools
+        let activeQuestionDataset = [];
+
+        function initDB() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(DB_NAME, DB_VERSION);
+                request.onerror = (e) => reject(e);
+                request.onsuccess = (e) => { db = e.target.result; resolve(db); };
+                request.onupgradeneeded = (e) => {
+                    const database = e.target.result;
+                    if (!database.objectStoreNames.contains('questions')) {
+                        const store = database.createObjectStore('questions', { keyPath: 'id', autoIncrement: true });
+                        store.createIndex('questionText', 'question', { unique: true });
+                    }
+                };
+            });
+        }
+
+        // --- APPARATUS NAVIGATION & ROUTING ENGINE ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                if(tab.getAttribute('onclick').includes(tabId)) tab.classList.add('active');
+            });
+
+            // Context-driven module refresh routines
+            if (tabId === 'dashboard') updateDashboard();
+            if (tabId === 'practice') loadPracticeEngine();
+            if (tabId === 'statistics') generateAdvancedStatistics();
+            if (tabId === 'manager') loadManagerDataset();
+        }
+
+        // Theme Toggle Infrastructure
+        const themeToggle = document.getElementById('themeToggle');
+        themeToggle.addEventListener('click', () => {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            if (isDark) {
+                document.documentElement.removeAttribute('data-theme');
+                themeToggle.textContent = 'Dark Mode';
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                themeToggle.textContent = 'Light Mode';
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            themeToggle.textContent = 'Light Mode';
+        }
+
+        // --- CORE RUNTIME ENGINES ---
+
+        // Dashboard Metrics Calculator
+        async function updateDashboard() {
+            if (!db) return;
+            const transaction = db.transaction(['questions'], 'readonly');
+            const store = transaction.objectStore('questions');
+            let total = 0, solved = 0, correct = 0, wrong = 0;
+
+            store.openCursor().onsuccess = (e) => {
+                const cursor = e.target.result;
+                if (cursor) {
+                    total++;
+                    const q = cursor.value;
+                    if (q.attempts > 0) solved++;
+                    correct += (q.correctCount || 0);
+                    wrong += (q.wrongCount || 0);
+                    cursor.continue();
+                } else {
+                    document.getElementById('dashTotal').textContent = total;
+                    document.getElementById('dashSolved').textContent = solved;
+                    document.getElementById('dashCorrect').textContent = correct;
+                    document.getElementById('dashWrong').textContent = wrong;
+                    const accuracy = correct + wrong > 0 ? Math.round((correct / (correct + wrong)) * 100) : 0;
+                    document.getElementById('dashAccuracy').textContent = accuracy + '%';
+                }
+            };
+        }
+
+        // Plain Text Question Parser & Importer (Phase 2)
+        document.getElementById('btnDoImport').addEventListener('click', async () => {
+            const rawText = document.getElementById('importText').value.trim();
+            if (!rawText) return showImportStatus('Please populate input source cluster blocks first.', 'error');
+
+            showImportStatus('Parsing streams...', 'info');
+            const lines = rawText.split(/\r?\n/);
+            const parsed = [];
+            let currentQ = null, mode = null;
+
+            for (let line of lines) {
+                const clean = line.trim();
+                if (!clean) continue;
+
+                if (/^Question:/i.test(clean)) {
+                    if (currentQ) parsed.push(currentQ);
+                    currentQ = { chapter: "General", syllabusSection: "K1", kLevel: "K1", question: "", options: [], correctAnswer: "", explanation: "", bookmarked: false, attempts: 0, correctCount: 0, wrongCount: 0, lastSolved: null };
+                    mode = 'question'; continue;
+                } else if (/^Answer:/i.test(clean)) { mode = 'answer'; continue; }
+                else if (/^Explanation:/i.test(clean)) { mode = 'explanation'; continue; }
+
+                if (mode === 'question') {
+                    if (/^[A-E]\./i.test(clean)) { mode = 'options'; currentQ.options.push(clean); }
+                    else { currentQ.question = currentQ.question ? currentQ.question + '\n' + clean : clean; }
+                } else if (mode === 'options') {
+                    if (/^[A-E]\./i.test(clean)) currentQ.options.push(clean);
+                    else if (currentQ.options.length > 0) currentQ.options[currentQ.options.length - 1] += ' ' + clean;
+                } else if (mode === 'answer') {
+                    currentQ.correctAnswer = clean.toUpperCase().replace(/[^A-E]/g, '');
+                } else if (mode === 'explanation') {
+                    currentQ.explanation = currentQ.explanation ? currentQ.explanation + '\n' + clean : clean;
+                }
+            }
+            if (currentQ) parsed.push(currentQ);
+
+            let added = 0, skipped = 0;
+            const tx = db.transaction(['questions'], 'readwrite');
+            const store = tx.objectStore('questions');
+
+            for (const q of parsed) {
+                if (!q.question || q.options.length === 0 || !q.correctAnswer) continue;
+                try {
+                    await new Promise((res, rej) => {
+                        const req = store.add(q);
+                        req.onsuccess = res;
+                        req.onerror = (err) => { err.preventDefault(); rej(err); };
+                    });
+                    added++;
+                } catch { skipped++; }
+            }
+            showImportStatus(`Import Finished. Added ${added} records (${skipped} duplicates dropped).`, 'success');
+            document.getElementById('importText').value = '';
+            updateDashboard();
+        });
+
+        document.getElementById('btnClearImport').addEventListener('click', () => {
+            document.getElementById('importText').value = '';
+            document.getElementById('importStatus').style.display = 'none';
+        });
+
+        function showImportStatus(msg, type) {
+            const div = document.getElementById('importStatus');
+            div.textContent = msg; div.style.display = 'block';
+            div.style.backgroundColor = type === 'success' ? 'rgba(46,125,50,0.15)' : type === 'error' ? 'rgba(198,40,40,0.15)' : 'rgba(0,102,204,0.15)';
+            div.style.color = type === 'success' ? 'var(--success-color)' : type === 'error' ? 'var(--danger-color)' : 'var(--primary-color)';
+        }
+
+        // Practice Mode Engine (Phase 3)
+        function loadPracticeEngine() {
+            if (!db) return;
+            const tx = db.transaction(['questions'], 'readonly');
+            practiceQuestions = [];
+            tx.objectStore('questions').openCursor().onsuccess = (e) => {
+                const cursor = e.target.result;
+                if (cursor) { practiceQuestions.push(cursor.value); cursor.continue(); }
+                else { setupPracticeView(); }
+            };
+        }
+
+        function setupPracticeView() {
+            const empty = document.getElementById('practiceEmptyState');
+            const workspace = document.getElementById('practiceWorkspace');
+            if (practiceQuestions.length === 0) { empty.style.display = 'block'; workspace.style.display = 'none'; return; }
+            empty.style.display = 'none'; workspace.style.display = 'block';
+            renderPracticeQuestion();
+        }
+
+        function renderPracticeQuestion() {
+            const q = practiceQuestions[practiceIndex];
+            selectedPracticeOption = null;
+            practiceIsSubmitted = false;
+            document.getElementById('practiceExplanationContainer').style.display = 'none';
+            document.getElementById('btnPracticeSubmit').disabled = false;
+
+            document.getElementById('practiceMeta').textContent = `ID: ${q.id} | Chapter: ${q.chapter} | K-Level: ${q.kLevel}`;
+            document.getElementById('practiceQuestionText').textContent = q.question;
+            document.getElementById('btnPracticeBookmark').textContent = q.bookmarked ? '★ Bookmarked' : '☆ Bookmark';
+
+            const container = document.getElementById('practiceOptionsContainer');
+            container.innerHTML = '';
+
+            q.options.forEach(opt => {
+                const choiceKey = opt.trim().charAt(0).toUpperCase();
+                const btn = document.createElement('button');
+                btn.style.textAlign = 'left'; btn.style.padding = '1rem'; btn.style.border = '1px solid var(--border-color)';
+                btn.style.backgroundColor = 'var(--bg-color)'; btn.style.color = 'var(--text-color)'; btn.style.borderRadius = '6px';
+                btn.textContent = opt;
+
+                btn.addEventListener('click', () => {
+                    if (practiceIsSubmitted) return;
+                    selectedPracticeOption = choiceKey;
+                    Array.from(container.children).forEach(child => {
+                        child.style.borderColor = 'var(--border-color)'; child.style.background = 'var(--bg-color)';
+                    });
+                    btn.style.borderColor = 'var(--primary-color)'; btn.style.background = 'rgba(0,102,204,0.1)';
+                });
+                container.appendChild(btn);
+            });
+
+            document.getElementById('btnPracticePrev').disabled = (practiceIndex === 0);
+            document.getElementById('btnPracticeNext').disabled = (practiceIndex === practiceQuestions.length - 1);
+        }
+
+        document.getElementById('btnPracticeSubmit').addEventListener('click', () => {
+            if (!selectedPracticeOption || practiceIsSubmitted) return;
+            practiceIsSubmitted = true;
+            document.getElementById('btnPracticeSubmit').disabled = true;
+
+            const q = practiceQuestions[practiceIndex];
+            q.attempts = (q.attempts || 0) + 1;
+            q.lastSolved = new Date().toISOString();
+
+            const container = document.getElementById('practiceOptionsContainer');
+            Array.from(container.children).forEach(btn => {
+                const key = btn.textContent.trim().charAt(0).toUpperCase();
+                if (key === q.correctAnswer) {
+                    btn.style.borderColor = 'var(--success-color)'; btn.style.backgroundColor = 'rgba(46,125,50,0.15)';
+                } else if (key === selectedPracticeOption) {
+                    btn.style.borderColor = 'var(--danger-color)'; btn.style.backgroundColor = 'rgba(198,40,40,0.15)';
+                }
+            });
+
+            if (selectedPracticeOption === q.correctAnswer) { q.correctCount = (q.correctCount || 0) + 1; }
+            else { q.wrongCount = (q.wrongCount || 0) + 1; }
+
+            const tx = db.transaction(['questions'], 'readwrite');
+            tx.objectStore('questions').put(q);
+
+            document.getElementById('practiceExplanationText').textContent = q.explanation || "No explanation recorded for this question module.";
+            document.getElementById('practiceExplanationContainer').style.display = 'block';
+        });
+
+        document.getElementById('btnPracticePrev').addEventListener('click', () => { if (practiceIndex > 0) { practiceIndex--; renderPracticeQuestion(); } });
+        document.getElementById('btnPracticeNext').addEventListener('click', () => { if (practiceIndex < practiceQuestions.length - 1) { practiceIndex++; renderPracticeQuestion(); } });
+        
+        document.getElementById('btnPracticeBookmark').addEventListener('click', () => {
+            const q = practiceQuestions[practiceIndex];
+            q.bookmarked = !q.bookmarked;
+            const tx = db.transaction(['questions'], 'readwrite');
+            tx.objectStore('questions').put(q);
+            document.getElementById('btnPracticeBookmark').textContent = q.bookmarked ? '★ Bookmarked' : '☆ Bookmark';
+        });
+
+        // Exam Mode Engine (Phase 4)
+        document.getElementById('btnStartExam').addEventListener('click', () => {
+            const count = parseInt(document.getElementById('examCount').value, 10) || 20;
+            const tx = db.transaction(['questions'], 'readonly');
+            const cache = [];
+            tx.objectStore('questions').openCursor().onsuccess = (e) => {
+                const cursor = e.target.result;
+                if (cursor) { cache.push(cursor.value); cursor.continue(); }
+                else {
+                    if (cache.length === 0) return alert('Import question resources prior to initiating exam routines.');
+                    examQuestions = cache.sort(() => 0.5 - Math.random()).slice(0, count);
+                    startExamInterface();
+                }
+            };
+        });
+
+        function startExamInterface() {
+            examAnswers = {}; examFlags = {}; examIndex = 0; examSecondsElapsed = 0;
+            document.getElementById('examConfig').style.display = 'none';
+            document.getElementById('examResults').style.display = 'none';
+            document.getElementById('examWorkspace').style.display = 'block';
+
+            clearInterval(examTimerInterval);
+            examTimerInterval = setInterval(() => {
+                examSecondsElapsed++;
+                const m = String(Math.floor(examSecondsElapsed / 60)).padStart(2, '0');
+                const s = String(examSecondsElapsed % 60).padStart(2, '0');
+                document.getElementById('examTimer').textContent = `${m}:${s}`;
+            }, 1000);
+            renderExamQuestion();
+        }
+
+        function renderExamQuestion() {
+            const q = examQuestions[examIndex];
+            document.getElementById('examProgress').textContent = `Question ${examIndex + 1} of ${examQuestions.length}`;
+            document.getElementById('examQuestionText').textContent = q.question;
+
+            const flagBtn = document.getElementById('btnFlagQuestion');
+            if (examFlags[examIndex]) {
+                flagBtn.style.backgroundColor = 'var(--danger-color)'; flagBtn.style.color = 'white';
+                document.getElementById('flagBtnText').textContent = 'Flagged';
+            } else {
+                flagBtn.style.backgroundColor = 'var(--border-color)'; flagBtn.style.color = 'var(--text-color)';
+                document.getElementById('flagBtnText').textContent = 'Flag Question';
+            }
+
+            const container = document.getElementById('examOptionsContainer');
+            container.innerHTML = '';
+
+            q.options.forEach(opt => {
+                const key = opt.trim().charAt(0).toUpperCase();
+                const btn = document.createElement('button');
+                btn.style.textAlign = 'left'; btn.style.padding = '1rem'; btn.style.border = '1px solid var(--border-color)';
+                btn.style.backgroundColor = 'var(--bg-color)'; btn.style.color = 'var(--text-color)'; btn.style.borderRadius = '6px';
+                btn.textContent = opt;
+
+                if (examAnswers[examIndex] === key) {
+                    btn.style.borderColor = 'var(--primary-color)'; btn.style.backgroundColor = 'rgba(0,102,204,0.1)';
+                }
+                btn.addEventListener('click', () => { examAnswers[examIndex] = key; renderExamQuestion(); });
+                container.appendChild(btn);
+            });
+
+            document.getElementById('btnExamPrev').disabled = (examIndex === 0);
+            document.getElementById('btnExamNext').disabled = (examIndex === examQuestions.length - 1);
+        }
+
+        document.getElementById('btnExamPrev').addEventListener('click', () => { if (examIndex > 0) { examIndex--; renderExamQuestion(); } });
+        document.getElementById('btnExamNext').addEventListener('click', () => { if (examIndex < examQuestions.length - 1) { examIndex++; renderExamQuestion(); } });
+        document.getElementById('btnFlagQuestion').addEventListener('click', () => { examFlags[examIndex] = !examFlags[examIndex]; renderExamQuestion(); });
+
+        document.getElementById('btnSubmitExam').addEventListener('click', () => {
+            if (confirm('Conclude active exam tracking profile configurations?')) evaluationExamProfile();
+        });
+
+        async function evaluationExamProfile() {
+            clearInterval(examTimerInterval);
+            let correct = 0, wrong = 0, skipped = 0;
+            const tx = db.transaction(['questions'], 'readwrite');
+            const store = tx.objectStore('questions');
+
+            for (let i = 0; i < examQuestions.length; i++) {
+                const q = examQuestions[i];
+                const ans = examAnswers[i];
+                q.attempts = (q.attempts || 0) + 1;
+                q.lastSolved = new Date().toISOString();
+
+                if (!ans) { skipped++; q.wrongCount = (q.wrongCount || 0) + 1; }
+                else if (ans === q.correctAnswer) { correct++; q.correctCount = (q.correctCount || 0) + 1; }
+                else { wrong++; q.wrongCount = (q.wrongCount || 0) + 1; }
+                store.put(q);
+            }
+
+            document.getElementById('examWorkspace').style.display = 'none';
+            document.getElementById('examResults').style.display = 'block';
+            document.getElementById('examResultCorrect').textContent = correct;
+            document.getElementById('examResultWrong').textContent = wrong;
+            document.getElementById('examResultSkipped').textContent = skipped;
+            document.getElementById('examResultScore').textContent = `${examQuestions.length > 0 ? Math.round((correct / examQuestions.length) * 100) : 0}%`;
+            updateDashboard();
+        }
+
+        document.getElementById('btnExitExam').addEventListener('click', () => {
+            document.getElementById('examResults').style.display = 'none';
+            document.getElementById('examConfig').style.display = 'block';
+        });
+
+        // Advanced Analytical Module (Phase 5)
+        async function generateAdvancedStatistics() {
+            if (!db) return;
+            const tx = db.transaction(['questions'], 'readonly');
+            let pool = 0, atts = 0, miss = 0, bmarks = 0;
+            const chapters = {}, klevels = {};
+
+            tx.objectStore('questions').openCursor().onsuccess = (e) => {
+                const cursor = e.target.result;
+                if (cursor) {
+                    pool++; const q = cursor.value;
+                    if (q.bookmarked) bmarks++;
+                    atts += (q.attempts || 0); miss += (q.wrongCount || 0);
+
+                    const ch = q.chapter || "General Modules";
+                    const kl = q.kLevel || "K1";
+
+                    if (!chapters[ch]) chapters[ch] = { correct: 0, attempts: 0 };
+                    if (!klevels[kl]) klevels[kl] = { correct: 0, attempts: 0 };
+
+                    if (q.attempts > 0) {
+                        chapters[ch].correct += (q.correctCount || 0); chapters[ch].attempts += q.attempts;
+                        klevels[kl].correct += (q.correctCount || 0); klevels[kl].attempts += q.attempts;
+                    }
+                    cursor.continue();
+                } else {
+                    document.getElementById('statsTotalPool').textContent = pool;
+                    document.getElementById('statsTotalAttempts').textContent = atts;
+                    document.getElementById('statsTotalMisses').textContent = miss;
+                    document.getElementById('statsTotalBookmarks').textContent = bmarks;
+
+                    renderStatTable('statsChapterTableBody', chapters);
+                    renderStatTable('statsKLevelTableBody', klevels);
+                }
+            };
+        }
+
+        function renderStatTable(id, data) {
+            const body = document.getElementById(id); body.innerHTML = '';
+            const keys = Object.keys(data).sort();
+            if (keys.length === 0) { body.innerHTML = '<tr><td style="padding:1rem; color:var(--text-muted);">No metrics collected yet.</td></tr>'; return; }
+
+            keys.forEach(k => {
+                const s = data[k];
+                const acc = s.attempts > 0 ? Math.round((s.correct / s.attempts) * 100) : 0;
+                const tr = document.createElement('tr'); tr.style.borderBottom = '1px solid var(--border-color)';
+                tr.innerHTML = `<td style="padding:0.6rem 0.2rem;">${k}</td><td style="text-align:center;">${s.attempts} Solved</td><td style="text-align:right; font-weight:700; color:${s.attempts > 0 ? (acc >= 75 ? 'var(--success-color)' : 'var(--danger-color)') : 'inherit'}">${s.attempts > 0 ? acc + '%' : '—'}</td>`;
+                body.appendChild(tr);
+            });
+        }
+
+        // Question Manager System (Phase 6)
+        async function loadManagerDataset() {
+            if (!db) return;
+            const tx = db.transaction(['questions'], 'readonly');
+            activeQuestionDataset = [];
+            tx.objectStore('questions').openCursor().onsuccess = (e) => {
+                const cursor = e.target.result;
+                if (cursor) { activeQuestionDataset.push(cursor.value); cursor.continue(); }
+                else { renderManagerList(); }
+            };
+        }
+
+        function renderManagerList(filter = "") {
+            const container = document.getElementById('managerQuestionsList'); container.innerHTML = '';
+            const query = filter.toLowerCase().trim();
+            const matched = activeQuestionDataset.filter(q => q.question.toLowerCase().includes(query) || (q.chapter && q.chapter.toLowerCase().includes(query)));
+
+            if (matched.length === 0) { container.innerHTML = '<p style="padding:2rem; text-align:center; color:var(--text-muted);">No questions match search definitions.</p>'; return; }
+
+            matched.forEach(q => {
+                const card = document.createElement('div'); card.className = 'stat-card';
+                card.style.textAlign = 'left'; card.style.display = 'flex'; card.style.justifyContent = 'space-between'; card.style.alignItems = 'center'; card.style.padding = '1rem';
+
+                const summary = document.createElement('div'); summary.style.flex = "1";
+                summary.innerHTML = `<div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); margin-bottom:0.2rem;">ID: ${q.id} | CHAPTER: ${q.chapter} | LEVEL: ${q.kLevel}</div>
+                                     <p style="font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:600px;">${q.question}</p>`;
+
+                const actions = document.createElement('div'); actions.style.display = "flex"; actions.style.gap = "0.5rem";
+
+                const bmark = document.createElement('button'); bmark.style.background = q.bookmarked ? '#ffb300' : 'var(--border-color)'; bmark.textContent = q.bookmarked ? '★' : '☆';
+                bmark.addEventListener('click', () => { q.bookmarked = !q.bookmarked; const tx = db.transaction(['questions'], 'readwrite'); tx.objectStore('questions').put(q); tx.oncomplete = loadManagerDataset; });
+
+                const editBtn = document.createElement('button'); editBtn.style.background = 'var(--primary-color)'; editBtn.style.color = 'white'; editBtn.textContent = 'Edit';
+                editBtn.addEventListener('click', () => launchEditModal(q));
+
+                const delBtn = document.createElement('button'); delBtn.style.background = 'var(--danger-color)'; delBtn.style.color = 'white'; delBtn.textContent = 'Delete';
+                delBtn.addEventListener('click', () => { if (confirm('Delete this item?')) { const tx = db.transaction(['questions'], 'readwrite'); tx.objectStore('questions').delete(q.id); tx.oncomplete = loadManagerDataset; } });
+
+                actions.appendChild(bmark); actions.appendChild(editBtn); actions.appendChild(delBtn);
+                card.appendChild(summary); card.appendChild(actions); container.appendChild(card);
+            });
+        }
+
+        document.getElementById('managerSearchInput').addEventListener('input', (e) => renderManagerList(e.target.value));
+
+        function launchEditModal(q) {
+            document.getElementById('editQId').value = q.id;
+            document.getElementById('editQChapter').value = q.chapter || '';
+            document.getElementById('editQSyllabus').value = q.syllabusSection || '';
+            document.getElementById('editQKLevel').value = q.kLevel || '';
+            document.getElementById('editQText').value = q.question || '';
+            document.getElementById('editQOptions').value = (q.options || []).join('\n');
+            document.getElementById('editQCorrect').value = q.correctAnswer || '';
+            document.getElementById('editQExplanation').value = q.explanation || '';
+            document.getElementById('editModalOverlay').style.display = 'flex';
+        }
+
+        document.getElementById('btnCancelEdit').addEventListener('click', () => document.getElementById('editModalOverlay').style.display = 'none');
+        document.getElementById('btnSaveEdit').addEventListener('click', () => {
+            const id = parseInt(document.getElementById('editQId').value, 10);
+            const tx = db.transaction(['questions'], 'readwrite');
+            const store = tx.objectStore('questions');
+
+            store.get(id).onsuccess = (e) => {
+                const r = e.target.result; if (!r) return;
+                r.chapter = document.getElementById('editQChapter').value.trim();
+                r.syllabusSection = document.getElementById('editQSyllabus').value.trim();
+                r.kLevel = document.getElementById('editQKLevel').value.trim();
+                r.question = document.getElementById('editQText').value.trim();
+                r.options = document.getElementById('editQOptions').value.split('\n').map(l => l.trim()).filter(l => l);
+                r.correctAnswer = document.getElementById('editQCorrect').value.trim().toUpperCase();
+                r.explanation = document.getElementById('editQExplanation').value.trim();
+
+                store.put(r);
+                tx.oncomplete = () => { document.getElementById('editModalOverlay').style.display = 'none'; loadManagerDataset(); };
+            };
+        });
+
+        // Backup Portability Features
+        document.getElementById('btnExportJSON').addEventListener('click', () => {
+            if (activeQuestionDataset.length === 0) return alert('No database elements available to export.');
+            const blob = new Blob([JSON.stringify(activeQuestionDataset, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = `ISTQB_Backup_${new Date().toISOString().slice(0,10)}.json`;
+            a.click(); URL.revokeObjectURL(url);
+        });
+
+        document.getElementById('btnTriggerJSONImport').addEventListener('click', () => document.getElementById('fileJSONInput').click());
+        document.getElementById('fileJSONInput').addEventListener('change', (e) => {
+            const f = e.target.files[0]; if (!f) return;
+            const r = new FileReader();
+            r.onload = async (evt) => {
+                try {
+                    const arr = JSON.parse(evt.target.result);
+                    if (!Array.isArray(arr)) throw new Error("Invalid format layout framework.");
+                    const tx = db.transaction(['questions'], 'readwrite');
+                    const store = tx.objectStore('questions');
+                    let count = 0;
+                    for (let q of arr) {
+                        delete q.id;
+                        try { await new Promise((res, rej) => { const req = store.add(q); req.onsuccess = res; req.onerror = (err) => { err.preventDefault(); rej(); }; }); count++; } catch {}
+                    }
+                    alert(`Restored ${count} unique items successfully.`); loadManagerDataset();
+                } catch { alert('Error processing backup parsing arrays.'); }
+            };
+            r.readAsText(f);
+        });
+
+        document.getElementById('btnDeleteAll').addEventListener('click', () => {
+            if (confirm('CRITICAL: Purge your entire database and practice records? This cannot be undone.')) {
+                const tx = db.transaction(['questions'], 'readwrite');
+                tx.objectStore('questions').clear();
+                tx.oncomplete = () => { loadManagerDataset(); updateDashboard(); };
+            }
+        });
+
+        // Bootstrap Core
+        window.addEventListener('DOMContentLoaded', () => { initDB().then(() => updateDashboard()).catch(err => console.error(err)); });
+    </script>
+</body>
+</html>
